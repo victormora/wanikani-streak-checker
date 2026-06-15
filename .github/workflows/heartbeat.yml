@@ -1,0 +1,51 @@
+name: WaniKani Notifier Heartbeat 🦀
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Send heartbeat email
+        env:
+          GMAIL_CLIENT_ID:     ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          MY_EMAIL:            ${{ secrets.MY_EMAIL }}
+          FROM_EMAIL:          ${{ secrets.FROM_EMAIL }}
+        run: |
+          ACCESS_TOKEN=$(curl -s -X POST "https://oauth2.googleapis.com/token" \
+            --data-urlencode "client_id=${GMAIL_CLIENT_ID}" \
+            --data-urlencode "client_secret=${GMAIL_CLIENT_SECRET}" \
+            --data-urlencode "refresh_token=${GMAIL_REFRESH_TOKEN}" \
+            --data-urlencode "grant_type=refresh_token" \
+            | jq -r '.access_token')
+
+          RAW_EMAIL=$(cat <<EOF
+From: WaniKani Notifier <${FROM_EMAIL}>
+To: ${MY_EMAIL}
+Subject: ✅ WaniKani Notifier is alive 🦀
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+
+<p>Weekly check-in: your WaniKani notification system is up and running. 🎉</p>
+<p>This email also keeps the Gmail OAuth token alive — ignore it if everything looks normal.</p>
+<p>頑張ってください！🦀</p>
+EOF
+          )
+
+          ENCODED=$(printf '%s' "$RAW_EMAIL" | base64 | tr '+/' '-_' | tr -d '=\n')
+
+          curl -s -X POST \
+            "https://gmail.googleapis.com/gmail/v1/users/me/messages/send" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg raw "$ENCODED" '{"raw": $raw}')"
+
+          echo "Heartbeat sent."
