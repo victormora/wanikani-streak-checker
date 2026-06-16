@@ -1,0 +1,31 @@
+name: Bunpro Streak Check 📝
+
+on:
+  schedule:
+    # 19:00 UTC = 21:00 CEST (UTC+2, summer)
+    # Change to '0 20 * * *' in winter (CET, UTC+1)
+    # - cron: '0 19 * * *'
+  workflow_dispatch:
+
+jobs:
+  bunpro-streak-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Make script executable
+        run: chmod +x ./bunpro_streak_check.sh
+
+      - name: Run Bunpro streak check
+        run: ./bunpro_streak_check.sh
+        env:
+          BUNPRO_EMAIL:          ${{ secrets.BUNPRO_EMAIL }}
+          BUNPRO_PASSWORD:       ${{ secrets.BUNPRO_PASSWORD }}
+          GMAIL_CLIENT_ID:       ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET:   ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN:   ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          MY_EMAIL:              ${{ secrets.MY_EMAIL }}
+          FROM_EMAIL:            ${{ secrets.FROM_EMAIL }}
+          TIMEZONE_OFFSET_HOURS: ${{ vars.TIMEZONE_OFFSET_HOURS }}
+          DEADLINE_HOUR:         ${{ vars.DEADLINE_HOUR }}
