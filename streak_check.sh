@@ -16,11 +16,14 @@ send_email() {
   local subject="$1"
   local body_html="$2"
 
+  local ENCODED_SUBJECT
+  ENCODED_SUBJECT="=?UTF-8?B?$(echo -n "${subject}" | base64 | tr -d '\n')?="
+
   local RAW_EMAIL
   RAW_EMAIL=$(cat <<EOF
 From: WaniKani Notifier <${FROM_EMAIL}>
 To: ${MY_EMAIL}
-Subject: ${subject}
+Subject: ${ENCODED_SUBJECT}
 MIME-Version: 1.0
 Content-Type: text/html; charset="UTF-8"
 
