@@ -1,7 +1,7 @@
 name: Bunpro Streak Check 📝
 
 on:
-  schedule:
+  # schedule:
     # 19:00 UTC = 21:00 CEST (UTC+2, summer)
     # Change to '0 20 * * *' in winter (CET, UTC+1)
     # - cron: '0 19 * * *'
