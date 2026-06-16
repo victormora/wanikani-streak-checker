@@ -1,7 +1,7 @@
 name: WaniKani Notifier Heartbeat 🦀
 
 on:
-  schedule:
+  # schedule:
     # - cron: '0 5 * * 1'  # Every Monday at 06:00 or 7:00 CET
   workflow_dispatch:
 
